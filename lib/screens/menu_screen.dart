@@ -12,7 +12,7 @@ class MenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryBg, // Pure Black
+      backgroundColor: AppColors.primaryBg,
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(gradient: AppColors.mainGradient),
@@ -22,14 +22,13 @@ class MenuScreen extends StatelessWidget {
             children: [
               const Spacer(flex: 2),
               
-              // NEON TITLE WITH MULTI-GLOW
               Text(
                 "NEON XOX\nDELUXE",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.orbitron(
                   color: Colors.white,
                   fontSize: 36,
-                  fontWeight: FontWeight.w900, // Fixed Weight
+                  fontWeight: FontWeight.w900,
                   letterSpacing: 4,
                   shadows: [
                     const Shadow(blurRadius: 10, color: AppColors.playerXColor),
@@ -38,9 +37,8 @@ class MenuScreen extends StatelessWidget {
                 ),
               ),
               
-              const SizedBox(height: 60),
+              const SizedBox(height: 50),
 
-              // GAME MODE BUTTONS
               _buildNeonMenuButton(
                 context, 
                 text: "LOCAL PVP", 
@@ -62,9 +60,11 @@ class MenuScreen extends StatelessWidget {
                 onPressed: () => _launchGame(context, GameMode.impossible),
               ),
               const SizedBox(height: 15),
+              
+              // EXISTING ROOM BUTTON
               _buildNeonMenuButton(
                 context, 
-                text: "ONLINE ROOM", 
+                text: "ROOM", 
                 color: AppColors.playerOColor,
                 onPressed: () {
                   Navigator.push(
@@ -73,10 +73,20 @@ class MenuScreen extends StatelessWidget {
                   );
                 },
               ),
+              const SizedBox(height: 15),
+
+              // NEW: PLAY ONLINE BUTTON (Neon Green Glow)
+              _buildNeonMenuButton(
+                context, 
+                text: "PLAY ONLINE", 
+                color: const Color(0xFF39FF14), // High-intensity Neon Green
+                onPressed: () {
+                  // Add your matchmaking or random play logic here
+                },
+              ),
               
               const Spacer(),
 
-              // EXIT BUTTON AT BOTTOM
               _buildNeonMenuButton(
                 context, 
                 text: "EXIT GAME", 
@@ -93,7 +103,6 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
-  // REUSABLE NEON BUTTON WIDGET
   Widget _buildNeonMenuButton(
     BuildContext context, {
     required String text,
@@ -105,12 +114,12 @@ class MenuScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Container(
         width: double.infinity,
-        height: isSmall ? 50 : 60,
+        height: isSmall ? 50 : 55, // Slightly slimmer for better fit
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.2),
+              color: color.withOpacity(0.3),
               blurRadius: 15,
               spreadRadius: 1,
             ),
@@ -119,16 +128,16 @@ class MenuScreen extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black.withOpacity(0.6),
+            backgroundColor: Colors.black.withOpacity(0.7),
             foregroundColor: color,
-            side: BorderSide(color: color.withOpacity(0.6), width: 2),
+            side: BorderSide(color: color.withOpacity(0.8), width: 2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             elevation: 0,
           ),
           child: Text(
             text,
             style: GoogleFonts.orbitron(
-              fontSize: isSmall ? 14 : 18,
+              fontSize: isSmall ? 14 : 17,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
             ),
