@@ -5,6 +5,7 @@ import 'game_screen.dart';
 import '../logic/game_controller.dart';
 import '../utils/constants.dart';
 import 'online_lobby.dart';
+import '../screens/matchmaking_screen.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -76,14 +77,18 @@ class MenuScreen extends StatelessWidget {
               const SizedBox(height: 15),
 
               // NEW: PLAY ONLINE BUTTON (Neon Green Glow)
-              _buildNeonMenuButton(
-                context, 
-                text: "PLAY ONLINE", 
-                color: const Color(0xFF39FF14), // High-intensity Neon Green
-                onPressed: () {
-                  // Add your matchmaking or random play logic here
-                },
-              ),
+            // Inside menu_screen.dart
+            _buildNeonMenuButton(
+              context, 
+              text: "PLAY ONLINE", 
+              color: const Color(0xFF39FF14), 
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MatchmakingScreen()),
+                );
+              },
+            ),
               
               const Spacer(),
 

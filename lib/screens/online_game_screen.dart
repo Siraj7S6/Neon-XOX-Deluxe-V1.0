@@ -6,9 +6,15 @@ import '../utils/constants.dart';
 
 class OnlineGameScreen extends StatefulWidget {
   final String roomCode;
-  final String mySymbol; // "X" or "O"
+  final String mySymbol; 
+  final bool isMatchmaking; // NEW: Flag to control UI visibility
 
-  const OnlineGameScreen({super.key, required this.roomCode, required this.mySymbol});
+  const OnlineGameScreen({
+    super.key, 
+    required this.roomCode, 
+    required this.mySymbol,
+    this.isMatchmaking = false, // Defaults to false for private rooms
+  });
 
   @override
   State<OnlineGameScreen> createState() => _OnlineGameScreenState();
@@ -20,6 +26,7 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
   @override
   void initState() {
     super.initState();
+    // The logic remains the same; we just hide the code from the user's eyes
     _controller = OnlineController(roomCode: widget.roomCode, mySymbol: widget.mySymbol);
   }
 
@@ -32,6 +39,7 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.primaryBg, // Pure Black background
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.mainGradient),
         child: SafeArea(
@@ -45,18 +53,20 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
                 children: [
                   _buildHeader(),
                   const SizedBox(height: 20),
+                  
+                  // Turn Indicator with Glow
                   Text(
                     state.winner == null 
                       ? (isMyTurn ? "YOUR TURN (${widget.mySymbol})" : "WAITING FOR OPPONENT...")
                       : "GAME OVER",
-                    style: GoogleFonts.poppins(
-                        color: isMyTurn ? Colors.greenAccent : Colors.white70,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold
+                    style: GoogleFonts.orbitron(
+                        color: isMyTurn ? AppColors.playerXColor : Colors.white70,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        shadows: isMyTurn ? AppStyles.neonShadow(AppColors.playerXColor) : null,
                     ),
                   ),
                   const Spacer(),
-                  // PASSING STATE TO THE GRID
                   _buildGrid(state, isMyTurn),
                   const Spacer(),
                   if (state.winner != null) _buildResult(state.winner!),
@@ -79,9 +89,15 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
+          // MODIFIED: Logic to hide room code
           Text(
-            "ROOM: ${widget.roomCode}",
-            style: GoogleFonts.poppins(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+            widget.isMatchmaking ? "" : "ROOM: ${widget.roomCode}",
+            style: GoogleFonts.orbitron(
+              color: Colors.white, 
+              fontSize: 18, 
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.5,
+            ),
           ),
         ],
       ),
@@ -97,21 +113,19 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, crossAxisSpacing: 10, mainAxisSpacing: 10),
+              crossAxisCount: 3, crossAxisSpacing: 12, mainAxisSpacing: 12),
           itemCount: 9,
-// Inside _buildGrid method in online_game_screen.dart
-              itemBuilder: (context, index) {
-                final bool isWinning = state.winningLine != null && 
-                                      state.winningLine!.contains(index);
+          itemBuilder: (context, index) {
+            bool isWinning = state.winningLine != null && state.winningLine!.contains(index);
 
-                return GameCell(
-                  value: state.board[index],
-                  isWinningCell: isWinning, // FIXED: Named correctly to match GameCell
-                  onTap: (isMyTurn && state.winner == null) 
-                      ? () => _controller.makeMove(index) 
-                      : () {},
-                );
-              },
+            return GameCell(
+              value: state.board[index],
+              isWinningCell: isWinning, 
+              onTap: (isMyTurn && state.winner == null) 
+                  ? () => _controller.makeMove(index) 
+                  : () {},
+            );
+          },
         ),
       ),
     );
@@ -122,15 +136,23 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
       padding: const EdgeInsets.all(20),
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white10, 
+        color: Colors.black.withOpacity(0.5), 
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white24)
+        border: Border.all(color: Colors.white10),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10)
+        ]
       ),
       child: Column(
         children: [
           Text(
             winner == "Draw" ? "IT'S A DRAW!" : "PLAYER $winner WINS!",
-            style: GoogleFonts.poppins(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+            style: GoogleFonts.orbitron(
+              color: Colors.white, 
+              fontSize: 22, 
+              fontWeight: FontWeight.bold,
+              shadows: [const Shadow(blurRadius: 10, color: Colors.white38)]
+            ),
           ),
           const SizedBox(height: 20),
           Row(
@@ -138,8 +160,9 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
             children: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent.withOpacity(0.8),
+                  backgroundColor: AppColors.playerXColor.withOpacity(0.8),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () => _controller.resetGame(),
                 child: const Text("PLAY AGAIN", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
@@ -147,7 +170,7 @@ class _OnlineGameScreenState extends State<OnlineGameScreen> {
               const SizedBox(width: 15),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("EXIT", style: TextStyle(color: Colors.white70)),
+                child: Text("EXIT", style: GoogleFonts.orbitron(color: Colors.white70, fontSize: 12)),
               ),
             ],
           ),
