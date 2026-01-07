@@ -1,0 +1,32 @@
+name: tick_tac_toe
+description:
+publish_to:
+version: 1.0.0+1
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.1.0
+  audioplayers: ^5.2.1
+  cupertino_icons: ^1.0.8
+  confetti: ^0.7.0
+  firebase_core: ^3.1.1
+  firebase_database: ^11.0.9
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  flutter_lints: ^6.0.0
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/sounds/DrawGame.mp3
+    - assets/sounds/Move.mp3
+    - assets/sounds/WinGame.mp3

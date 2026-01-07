@@ -1,0 +1,84 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'game_screen.dart';
+import '../logic/game_controller.dart';
+import '../utils/constants.dart';
+import '../widgets/menu_button.dart';
+import 'online_lobby.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class MenuScreen extends StatelessWidget {
+  const MenuScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(gradient: AppColors.mainGradient),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "NEON XOX DELUXE", 
+              style: GoogleFonts.orbitron(
+                color: Colors.white, 
+                fontSize: 32, 
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+                shadows: AppStyles.neonShadow(Colors.white38),
+              )
+            ),
+            const SizedBox(height: 50),
+            
+            // 1. Local PVP
+            MenuButton(
+              text: "Local PVP",
+              onPressed: () => _launchGame(context, GameMode.pvp),
+            ),
+            const SizedBox(height: 15),
+
+            // 2. Easy AI
+            MenuButton(
+              text: "Easy AI",
+              onPressed: () => _launchGame(context, GameMode.easy),
+            ),
+            const SizedBox(height: 15),
+
+            // 3. Impossible AI
+            MenuButton(
+              text: "Impossible AI",
+              onPressed: () => _launchGame(context, GameMode.impossible),
+            ),
+            const SizedBox(height: 15),
+
+            // 4. Online Multiplayer (Moved above Exit for better flow)
+            MenuButton(
+              text: "Room",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const OnlineLobby()),
+                );
+              },
+            ),
+            const SizedBox(height: 15), // Added missing spacing here
+
+            // 5. Exit (Usually the last option in a menu)
+            MenuButton(
+              text: "Exit",
+              onPressed: () => SystemNavigator.pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _launchGame(BuildContext context, GameMode mode) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => GameScreen(mode: mode)),
+    );
+  }
+}
