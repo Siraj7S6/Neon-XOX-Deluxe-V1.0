@@ -5,23 +5,30 @@ enum GameEvent { none, move, win, draw }
 enum GameMode { pvp, easy, impossible }
 
 class GameController extends ValueNotifier<GameState> {
-  // FIXED: Constructor now correctly accepts 'mode'
   GameController({GameMode mode = GameMode.pvp}) : super(GameState.initial(mode));
 
   void makeMove(int index) {
-    if (value.board[index] != "" || value.winner != null) return;
+    if (index < 0 || index >= 9 || value.board[index] != "" || value.winner != null) return;
 
     _processMove(index);
 
     // Trigger AI move if it's not PVP and game isn't over
     if (value.mode != GameMode.pvp && value.winner == null && !value.isDraw && !value.isXTurn) {
-      Future.delayed(const Duration(milliseconds: 600), () => _aiMove());
+      Future.delayed(const Duration(milliseconds: 600), () => makeAiMove());
     }
   }
 
-  void _aiMove() {
+  // UPDATED: Changed from _aiMove to makeAiMove to support Unit Testing
+  void makeAiMove() {
+    // Only proceed if it's actually the AI's turn and the game is active
+    if (value.winner != null || value.isDraw) return;
+
     int move = value.mode == GameMode.easy ? _getRandomMove() : _getBestMove();
-    _processMove(move);
+    
+    // Safety check for valid move index
+    if (move != -1) {
+      _processMove(move);
+    }
   }
 
   void _processMove(int index) {
@@ -60,22 +67,20 @@ class GameController extends ValueNotifier<GameState> {
     for (int i = 0; i < 9; i++) {
       if (value.board[i] == "") available.add(i);
     }
-    return available[Random().nextInt(available.length)];
+    return available.isEmpty ? -1 : available[Random().nextInt(available.length)];
   }
 
-  // --- PERFECT AI LOGIC ---
+  // --- PERFECT AI LOGIC (Minimax) ---
 
   int _getBestMove() {
     int bestScore = -1000;
     int move = -1;
 
-    // AI explores every empty spot to find the absolute best starting point
     for (int i = 0; i < 9; i++) {
       if (value.board[i] == "") {
-        value.board[i] = "O"; // Simulate AI move
-        // Start minimax with depth 0
+        value.board[i] = "O"; 
         int score = _minimax(value.board, 0, false);
-        value.board[i] = ""; // Undo move
+        value.board[i] = ""; 
 
         if (score > bestScore) {
           bestScore = score;
@@ -88,14 +93,8 @@ class GameController extends ValueNotifier<GameState> {
 
   int _minimax(List<String> board, int depth, bool isMaximizing) {
     String? result = _checkWinner(board);
-
-    // If AI wins, score is high. Subtract depth so it prefers FASTER wins.
     if (result == "O") return 10 - depth;
-
-    // If Human wins, score is low. Add depth so AI prefers LONGER survival.
     if (result == "X") return depth - 10;
-
-    // If no winner and board is full, it's a draw.
     if (!board.contains("")) return 0;
 
     if (isMaximizing) {
@@ -103,7 +102,6 @@ class GameController extends ValueNotifier<GameState> {
       for (int i = 0; i < 9; i++) {
         if (board[i] == "") {
           board[i] = "O";
-          // Recursive call for the opponent (Human)
           int score = _minimax(board, depth + 1, false);
           board[i] = "";
           bestScore = max(score, bestScore);
@@ -115,7 +113,6 @@ class GameController extends ValueNotifier<GameState> {
       for (int i = 0; i < 9; i++) {
         if (board[i] == "") {
           board[i] = "X";
-          // Recursive call for the opponent (AI)
           int score = _minimax(board, depth + 1, true);
           board[i] = "";
           bestScore = min(score, bestScore);
@@ -147,6 +144,7 @@ class GameController extends ValueNotifier<GameState> {
   void resetScores() => value = GameState.initial(value.mode);
 }
 
+// (GameState class remains unchanged)
 class GameState {
   final List<String> board;
   final bool isXTurn;
